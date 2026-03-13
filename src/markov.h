@@ -7,6 +7,27 @@
 namespace markov {
 using state = uint8_t;
 
+class distribution final {
+
+public:
+  class weights final {
+    uint32_t *base;
+    size_t len;
+
+  public:
+    weights(uint8_t states);
+    ~weights();
+    weights(const weights &);
+    weights(weights &&) = delete;
+    weights &operator=(const weights &);
+    weights &operator=(weights &&) = delete;
+
+    weights &operator+=(const weights &);
+    void insert(state state, uint32_t n = 1);
+    size_t size() const;
+  };
+};
+
 class transition final {
   double *base;
   size_t len;
