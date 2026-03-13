@@ -7,7 +7,7 @@
 namespace markov {
 using state = uint8_t;
 
-class transitions final {
+class transition final {
 
 public:
   class weights final {

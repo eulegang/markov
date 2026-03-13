@@ -6,7 +6,7 @@
 #include <cstring>
 #include <new>
 
-markov::transitions::weights::weights(uint8_t states) {
+markov::transition::weights::weights(uint8_t states) {
   len = states;
 
   size_t blen = markov::subbuffer_len(states);
@@ -16,9 +16,9 @@ markov::transitions::weights::weights(uint8_t states) {
   memset(base, 0, sizeof(uint32_t) * blen * states);
 }
 
-markov::transitions::weights::~weights() { free(base); }
+markov::transition::weights::~weights() { free(base); }
 
-markov::transitions::weights::weights(const markov::transitions::weights &w)
+markov::transition::weights::weights(const markov::transition::weights &w)
     : len{w.len} {
   size_t blen = markov::subbuffer_len(w.len);
   if (!(base = (uint32_t *)malloc(sizeof(uint32_t) * blen * w.len)))
@@ -27,8 +27,8 @@ markov::transitions::weights::weights(const markov::transitions::weights &w)
   memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
 }
 
-markov::transitions::weights &
-markov::transitions::weights::operator=(const markov::transitions::weights &w) {
+markov::transition::weights &
+markov::transition::weights::operator=(const markov::transition::weights &w) {
   free(base);
   size_t blen = markov::subbuffer_len(w.len);
   if (!(base = (uint32_t *)malloc(sizeof(uint32_t) * blen * w.len)))
@@ -39,8 +39,8 @@ markov::transitions::weights::operator=(const markov::transitions::weights &w) {
   return *this;
 }
 
-markov::transitions::weights &markov::transitions::weights::operator+=(
-    const markov::transitions::weights &w) {
+markov::transition::weights &
+markov::transition::weights::operator+=(const markov::transition::weights &w) {
   assert(len == w.len);
 
   size_t blen = subbuffer_len(len);
@@ -60,8 +60,8 @@ markov::transitions::weights &markov::transitions::weights::operator+=(
   return *this;
 }
 
-void markov::transitions::weights::insert(markov::state from, markov::state to,
-                                          uint32_t n) {
+void markov::transition::weights::insert(markov::state from, markov::state to,
+                                         uint32_t n) {
   size_t blen = subbuffer_len(len);
   markov::row *row = (markov::row *)(base + (blen * from));
 
@@ -69,7 +69,7 @@ void markov::transitions::weights::insert(markov::state from, markov::state to,
   entry.add(n);
 }
 
-size_t markov::transitions::weights::size() const {
+size_t markov::transition::weights::size() const {
   size_t total = 0;
   size_t blen = subbuffer_len(len);
   for (markov::state state = 0; state < len; state++) {
