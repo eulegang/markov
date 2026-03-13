@@ -1,6 +1,7 @@
 #include "markov.h"
 #include "priv.h"
 
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <new>
@@ -35,6 +36,27 @@ markov::transitions::weights::operator=(const markov::transitions::weights &w) {
 
   memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
   len = w.len;
+  return *this;
+}
+
+markov::transitions::weights &markov::transitions::weights::operator+=(
+    const markov::transitions::weights &w) {
+  assert(len == w.len);
+
+  size_t blen = subbuffer_len(len);
+  for (markov::state from = 0; from < len; from++) {
+    markov::row *row = (markov::row *)(base + (blen * from));
+    markov::row *orow = (markov::row *)(w.base + (blen * from));
+
+    uint32_t *nums = row->offset(0);
+    uint32_t *onums = orow->offset(0);
+
+    row->total += orow->total;
+    for (size_t i = 0; i < len; i++) {
+      *(nums++) += *(onums++);
+    }
+  }
+
   return *this;
 }
 
