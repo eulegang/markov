@@ -3,13 +3,39 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <new>
 
 markov::transitions::weights::weights(uint8_t states) {
   len = states;
 
   size_t blen = markov::subbuffer_len(states);
-  base = (uint32_t *)malloc(sizeof(uint32_t) * blen * states);
+  if (!(base = (uint32_t *)malloc(sizeof(uint32_t) * blen * states)))
+    throw std::bad_alloc();
+
   memset(base, 0, sizeof(uint32_t) * blen * states);
+}
+
+markov::transitions::weights::~weights() { free(base); }
+
+markov::transitions::weights::weights(const markov::transitions::weights &w)
+    : len{w.len} {
+  size_t blen = markov::subbuffer_len(w.len);
+  if (!(base = (uint32_t *)malloc(sizeof(uint32_t) * blen * w.len)))
+    throw std::bad_alloc();
+
+  memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
+}
+
+markov::transitions::weights &
+markov::transitions::weights::operator=(const markov::transitions::weights &w) {
+  free(base);
+  size_t blen = markov::subbuffer_len(w.len);
+  if (!(base = (uint32_t *)malloc(sizeof(uint32_t) * blen * w.len)))
+    throw std::bad_alloc();
+
+  memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
+  len = w.len;
+  return *this;
 }
 
 void markov::transitions::weights::insert(markov::state from, markov::state to,
