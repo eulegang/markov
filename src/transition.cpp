@@ -1,6 +1,7 @@
 
 #include "markov.h"
 #include "priv.h"
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <new>
@@ -43,5 +44,8 @@ markov::transition &markov::transition::operator=(const markov::transition &t) {
 }
 
 double markov::transition::ratio(state from, state to) const {
+  assert(from < len);
+  assert(to < len);
+
   return base[len * from + to];
 }

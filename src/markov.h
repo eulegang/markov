@@ -8,11 +8,15 @@ namespace markov {
 using state = uint8_t;
 
 class distribution final {
+  double *base;
+  size_t len;
 
 public:
   class weights final {
     uint32_t *base;
     size_t len;
+
+    friend class distribution;
 
   public:
     weights(uint8_t states);
@@ -26,6 +30,16 @@ public:
     void insert(state state, uint32_t n = 1);
     size_t size() const;
   };
+
+  distribution(const weights &);
+  ~distribution();
+  distribution(const distribution &);
+  distribution &operator=(const distribution &);
+
+  distribution(distribution &&) = delete;
+  distribution &operator=(distribution &&) = delete;
+
+  double ratio(state state) const;
 };
 
 class transition final {
