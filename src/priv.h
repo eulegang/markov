@@ -28,7 +28,7 @@ struct row {
     return entry;
   }
 
-  uint32_t *offset(size_t off) { return ((uint32_t *)this) + 2 + off; }
+  uint32_t *offset(size_t off = 0) { return ((uint32_t *)this) + 2 + off; }
 };
 
 inline size_t subbuffer_len(uint8_t states) {
