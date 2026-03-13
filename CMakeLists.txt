@@ -10,6 +10,8 @@ project(markov
 file(GLOB LIB_SRC "src/*.cpp")
 add_library(markov SHARED ${LIB_SRC})
 
+include(cmake/gdb.cmake)
+
 find_package(GTest REQUIRED)
 
 enable_testing()
