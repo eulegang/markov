@@ -28,14 +28,14 @@ markov::transition::~transition() { free(base); }
 
 markov::transition::transition(const markov::transition &t) {
   len = t.len;
-  if ((base = (double *)malloc(sizeof(double) * len * len)))
+  if (!(base = (double *)malloc(sizeof(double) * len * len)))
     throw std::bad_alloc();
 
   memcpy(base, t.base, sizeof(double) * len * len);
 }
 markov::transition &markov::transition::operator=(const markov::transition &t) {
   len = t.len;
-  if ((base = (double *)malloc(sizeof(double) * len * len)))
+  if (!(base = (double *)malloc(sizeof(double) * len * len)))
     throw std::bad_alloc();
 
   memcpy(base, t.base, sizeof(double) * len * len);
