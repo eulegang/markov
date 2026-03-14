@@ -1,10 +1,28 @@
-#include "markov.h"
-#include "priv.h"
-
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <new>
+
+#include "markov.h"
+#include "priv.h"
+
+void markov::transition::weights::invariant() const {
+  assert(base);
+  assert(len);
+
+  size_t blen = subbuffer_len(len);
+  for (markov::state state = 0; state < len; state++) {
+    markov::row *row = (markov::row *)(base + (blen * state));
+    uint32_t *base = row->offset();
+    uint64_t total = 0;
+
+    for (size_t i = 0; i < len; i++) {
+      total += base[i];
+    }
+
+    assert(total == row->total);
+  }
+}
 
 markov::transition::weights::weights(uint8_t states) {
   len = states;
@@ -14,6 +32,8 @@ markov::transition::weights::weights(uint8_t states) {
     throw std::bad_alloc();
 
   memset(base, 0, sizeof(uint32_t) * blen * states);
+
+  check_invariant();
 }
 
 markov::transition::weights::~weights() { free(base); }
@@ -25,6 +45,8 @@ markov::transition::weights::weights(const markov::transition::weights &w)
     throw std::bad_alloc();
 
   memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
+
+  check_invariant();
 }
 
 markov::transition::weights &
@@ -36,6 +58,9 @@ markov::transition::weights::operator=(const markov::transition::weights &w) {
 
   memcpy(base, w.base, sizeof(uint32_t) * blen * w.len);
   len = w.len;
+
+  check_invariant();
+
   return *this;
 }
 
@@ -57,6 +82,8 @@ markov::transition::weights::operator+=(const markov::transition::weights &w) {
     }
   }
 
+  check_invariant();
+
   return *this;
 }
 
@@ -67,6 +94,8 @@ void markov::transition::weights::insert(markov::state from, markov::state to,
 
   markov::transition_entry entry = row->entry(to);
   entry.add(n);
+
+  check_invariant();
 }
 
 size_t markov::transition::weights::size() const {

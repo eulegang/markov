@@ -4,6 +4,14 @@
 #include <cstddef>
 #include <cstdint>
 
+#ifndef NDEBUG
+#define check_invariant() invariant()
+#else
+#define check_invariant()
+#endif
+
+#define MARKOV_ERROR_MARGIN 1e-12
+
 namespace markov {
 
 struct transition_entry {

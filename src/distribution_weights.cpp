@@ -1,6 +1,14 @@
-#include "markov.h"
+#include <cassert>
 #include <cstdlib>
 #include <new>
+
+#include "markov.h"
+#include "priv.h"
+
+void markov::distribution::weights::invariant() const {
+  assert(base);
+  assert(len);
+}
 
 markov::distribution::weights::weights(uint8_t states) {
 
@@ -11,6 +19,8 @@ markov::distribution::weights::weights(uint8_t states) {
   for (size_t i = 0; i < len; i++) {
     base[i] = 0.0;
   }
+
+  check_invariant();
 }
 
 markov::distribution::weights::weights(const markov::distribution::weights &w) {
@@ -21,6 +31,8 @@ markov::distribution::weights::weights(const markov::distribution::weights &w) {
   for (size_t i = 0; i < len; i++) {
     base[i] = w.base[i];
   }
+
+  check_invariant();
 }
 
 markov::distribution::weights &markov::distribution::weights::operator=(
@@ -34,6 +46,8 @@ markov::distribution::weights &markov::distribution::weights::operator=(
   for (size_t i = 0; i < len; i++) {
     base[i] = w.base[i];
   }
+
+  check_invariant();
 
   return *this;
 }
@@ -52,4 +66,5 @@ size_t markov::distribution::weights::size() const {
 
 void markov::distribution::weights::insert(markov::state state, uint32_t n) {
   base[state] += n;
+  check_invariant();
 }

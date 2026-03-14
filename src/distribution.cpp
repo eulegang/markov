@@ -1,7 +1,21 @@
-#include "markov.h"
 #include <cassert>
 #include <cstdlib>
 #include <new>
+
+#include "markov.h"
+#include "priv.h"
+
+void markov::distribution::invariant() const {
+  assert(base);
+  assert(len);
+
+  double total = 1.0;
+  for (markov::state state = 0; state < len; state++) {
+    total -= base[state];
+  }
+
+  assert(std::abs(total) < MARKOV_ERROR_MARGIN);
+}
 
 markov::distribution::distribution(const markov::distribution::weights &w) {
   len = w.len;
@@ -18,6 +32,8 @@ markov::distribution::distribution(const markov::distribution::weights &w) {
   for (size_t i = 0; i < len; i++) {
     base[i] = w.base[i] / t;
   }
+
+  check_invariant();
 }
 
 markov::distribution::~distribution() { free(base); }
@@ -31,6 +47,8 @@ markov::distribution::distribution(const markov::distribution &d) {
   for (size_t i = 0; i < len; i++) {
     base[i] = d.base[i];
   }
+
+  check_invariant();
 }
 
 markov::distribution &
@@ -43,6 +61,8 @@ markov::distribution::operator=(const markov::distribution &d) {
   for (size_t i = 0; i < len; i++) {
     base[i] = d.base[i];
   }
+
+  check_invariant();
 
   return *this;
 }

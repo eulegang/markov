@@ -11,12 +11,16 @@ class distribution final {
   double *base;
   size_t len;
 
+  void invariant() const;
+
 public:
   class weights final {
     uint32_t *base;
     size_t len;
 
     friend class distribution;
+
+    void invariant() const;
 
   public:
     weights(uint8_t states);
@@ -46,12 +50,16 @@ class transition final {
   double *base;
   size_t len;
 
+  void invariant() const;
+
 public:
   class weights final {
     uint32_t *base;
     size_t len;
 
     friend class transition;
+
+    void invariant() const;
 
   public:
     weights(uint8_t states);
