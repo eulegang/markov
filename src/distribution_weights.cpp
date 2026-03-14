@@ -65,6 +65,7 @@ size_t markov::distribution::weights::size() const {
 }
 
 void markov::distribution::weights::insert(markov::state state, uint32_t n) {
+  assert(state < len);
   base[state] += n;
   check_invariant();
 }

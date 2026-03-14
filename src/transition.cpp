@@ -70,3 +70,8 @@ double markov::transition::ratio(state from, state to) const {
 
   return base[len * from + to];
 }
+
+markov::distribution
+markov::transition::operator()(const markov::distribution &d) const {
+  return markov::distribution(*this, d);
+}

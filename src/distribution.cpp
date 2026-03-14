@@ -36,6 +36,24 @@ markov::distribution::distribution(const markov::distribution::weights &w) {
   check_invariant();
 }
 
+markov::distribution::distribution(const markov::transition &t,
+                                   const distribution &d) {
+  assert(t.len == d.len);
+
+  len = t.len;
+  if (!(base = (double *)malloc(sizeof(double) * len)))
+    throw std::bad_alloc();
+
+  for (markov::state i = 0; i < len; i++) {
+    double cur = 0;
+    for (markov::state from = 0; from < len; from++) {
+      cur += t.base[from * len + i] * d.base[from];
+    }
+
+    base[i] = cur;
+  }
+}
+
 markov::distribution::~distribution() { free(base); }
 
 markov::distribution::distribution(const markov::distribution &d) {
