@@ -48,6 +48,8 @@ public:
   distribution(distribution &&) = delete;
   distribution &operator=(distribution &&) = delete;
 
+  void from(const transition &, const distribution &);
+
   double ratio(state state) const;
 };
 
@@ -91,6 +93,7 @@ public:
   transition &operator=(transition &&) = delete;
 
   distribution operator()(const distribution &) const;
+  void operator()(distribution &, const distribution &) const;
 
   double ratio(state from, state to) const;
 };

@@ -44,14 +44,7 @@ markov::distribution::distribution(const markov::transition &t,
   if (!(base = (double *)malloc(sizeof(double) * len)))
     throw std::bad_alloc();
 
-  for (markov::state i = 0; i < len; i++) {
-    double cur = 0;
-    for (markov::state from = 0; from < len; from++) {
-      cur += t.base[from * len + i] * d.base[from];
-    }
-
-    base[i] = cur;
-  }
+  from(t, d);
 }
 
 markov::distribution::~distribution() { free(base); }
@@ -88,4 +81,16 @@ markov::distribution::operator=(const markov::distribution &d) {
 double markov::distribution::ratio(markov::state state) const {
   assert(state < len);
   return base[state];
+}
+
+void markov::distribution::from(const markov::transition &t,
+                                const markov::distribution &d) {
+  for (markov::state i = 0; i < len; i++) {
+    double cur = 0;
+    for (markov::state from = 0; from < len; from++) {
+      cur += t.base[from * len + i] * d.base[from];
+    }
+
+    base[i] = cur;
+  }
 }

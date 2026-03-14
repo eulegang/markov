@@ -75,3 +75,8 @@ markov::distribution
 markov::transition::operator()(const markov::distribution &d) const {
   return markov::distribution(*this, d);
 }
+
+void markov::transition::operator()(markov::distribution &dest,
+                                    const markov::distribution &src) const {
+  dest.from(*this, src);
+}
