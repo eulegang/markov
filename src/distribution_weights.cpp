@@ -69,3 +69,11 @@ void markov::distribution::weights::insert(markov::state state, uint32_t n) {
   base[state] += n;
   check_invariant();
 }
+
+markov::states markov::distribution::weights::states() {
+  return markov::states(len);
+}
+
+uint32_t markov::distribution::weights::operator[](markov::state state) const {
+  return base[state];
+}

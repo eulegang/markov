@@ -12,4 +12,5 @@ add_library(markov SHARED ${LIB_SRC})
 
 include(cmake/gdb.cmake)
 include(cmake/test.cmake)
+include(cmake/nodejs.cmake)
 

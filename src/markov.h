@@ -7,6 +7,25 @@
 namespace markov {
 using state = uint8_t;
 
+class state_iter final {
+  state cur;
+
+public:
+  state_iter(state cur) : cur{cur} {}
+  state operator*() const { return cur; };
+  state_iter operator++() { return state_iter(cur++); };
+  bool operator==(const state_iter &other) const { return cur == other.cur; };
+};
+
+class states final {
+  state max;
+
+public:
+  states(state max) : max{max} {}
+  state_iter begin() { return state_iter(0); }
+  state_iter end() { return state_iter(max); }
+};
+
 class transition;
 
 class distribution final {
@@ -35,8 +54,11 @@ public:
     weights &operator=(weights &&) = delete;
 
     weights &operator+=(const weights &);
+    uint32_t operator[](state state) const;
     void insert(state state, uint32_t n = 1);
     size_t size() const;
+
+    markov::states states();
   };
 
   distribution(const weights &);
