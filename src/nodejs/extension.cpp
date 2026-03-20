@@ -12,6 +12,8 @@ namespace node {
 struct Refs {
   napi_ref dist;
   napi_ref distw;
+  napi_ref transw;
+  napi_ref trans;
 };
 } // namespace node
 } // namespace markov
@@ -25,22 +27,31 @@ void cleanup(napi_env env, void *data, void *hint) {
 }
 
 napi_value init(napi_env env, napi_value exports) {
+  markov::node::napi node{env};
+
   napi_value version;
   napi_create_int64(env, 0, &version);
 
   markov::node::Refs *refs = new markov::node::Refs;
 
-  auto [dist_ref, dist_cons] = markov::node::define_distribution(env);
-  auto [distw_ref, distw_cons] = markov::node::define_distribution_weight(env);
+  napi_ref distw_ref = markov::node::define_distribution_weight(env);
+  napi_ref dist_ref = markov::node::define_distribution(env, distw_ref);
+  napi_ref transw_ref = markov::node::define_transition_weight(env);
+  napi_ref trans_ref = markov::node::define_transition(env, transw_ref);
 
   refs->dist = dist_ref;
   refs->distw = distw_ref;
+  refs->transw = transw_ref;
+  refs->trans = trans_ref;
 
   napi_set_instance_data(env, refs, cleanup, nullptr);
 
-  NAPI_CHECK(napi_set_named_property(env, exports, "version", version));
-  NAPI_CHECK(napi_set_named_property(env, exports, "Distribution", dist_cons));
-  NAPI_CHECK(napi_set_named_property(env, dist_cons, "Weights", distw_cons));
+  node.set_prop(exports, "version", version);
+  node.set_prop(exports, "Distribution", node.deref(dist_ref));
+  node.set_prop(exports, "Transition", node.deref(trans_ref));
+
+  node.set_prop(node.deref(dist_ref), "Weights", node.deref(distw_ref));
+  node.set_prop(node.deref(trans_ref), "Weights", node.deref(transw_ref));
 
   return exports;
 }

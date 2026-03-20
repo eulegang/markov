@@ -15,73 +15,103 @@ void dist_weight_dtor(napi_env, void *data, void *) {
 }
 
 napi_value dist_weight_ctor(napi_env env, napi_callback_info info) {
-  napi_value target;
+  napi node{env};
 
-  NAPI_CHECK(napi_get_new_target(env, info, &target));
+  napi_value target = node.new_target(info);
 
   if (target != nullptr) {
     size_t argc = 1;
     napi_value jsthis;
     napi_value argv[1];
-    NAPI_CHECK(napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr));
+    node.cb_info(info, &argc, argv, &jsthis);
 
-    bool is_array;
-    NAPI_CHECK(napi_is_array(env, argv[0], &is_array));
-    if (!is_array) {
-      NAPI_CHECK(napi_throw_error(env, nullptr, "need array of weights"));
+    if (!node.is_array(argv[0])) {
+      node.throw_error("need array of weights");
       return NULL;
     }
 
-    uint32_t length;
-    NAPI_CHECK(napi_get_array_length(env, argv[0], &length));
-    if (length > std::numeric_limits<uint8_t>::max()) {
-      NAPI_CHECK(napi_throw_error(env, NULL, "too many states"));
+    uint32_t length = node.array_length(argv[0]);
+    if (length > std::numeric_limits<markov::state>::max()) {
+      node.throw_error("too many states");
+      return NULL;
     }
+
+    if (length == 0) {
+      node.throw_error("too little states");
+      return NULL;
+    }
+
     markov::distribution::weights *weights =
         new markov::distribution::weights{(uint8_t)length};
 
     for (uint32_t i = 0; i < length; i++) {
-      napi_value elem;
-      NAPI_CHECK(napi_get_element(env, argv[0], i, &elem));
+      napi_value elem = node.array_elem(argv[0], i);
 
-      napi_valuetype ty;
-      NAPI_CHECK(napi_typeof(env, elem, &ty));
-
-      if (ty != napi_number) {
+      if (node.typeof(elem) != napi_number) {
         delete weights;
-        NAPI_CHECK(napi_throw_error(env, NULL, "invalid weight"));
+        node.throw_error("invalid weight");
         return NULL;
       }
 
-      uint32_t weight;
-      NAPI_CHECK(napi_get_value_uint32(env, elem, &weight));
-
-      weights->insert(i, weight);
+      weights->insert(i, node.get_uint32(elem));
     }
 
-    NAPI_CHECK(napi_wrap(env, jsthis, weights, dist_weight_dtor, NULL, NULL));
+    node.wrap(jsthis, weights, dist_weight_dtor);
 
     return jsthis;
   } else {
-    napi_throw_error(env, nullptr, "use new keyword");
+    node.throw_error("use new keyword");
     return NULL;
   }
 }
 
 napi_value dist_weight_insert(napi_env env, napi_callback_info info) {
-  (void)env;
-  (void)info;
+  napi node{env};
+
+  napi_value jsthis;
+  napi_value argv[2];
+  size_t argc = 1;
+  node.cb_info(info, &argc, argv, &jsthis);
+
+  markov::distribution::weights *weights;
+  node.unwrap(jsthis, reinterpret_cast<void **>(&weights));
+
+  uint32_t state = 255;
+  uint32_t n = 1;
+
+  if (node.typeof(argv[0]) != napi_number) {
+    node.throw_error("expected integer for state");
+    return NULL;
+  }
+
+  state = node.get_uint32(argv[0]);
+  if (state >= weights->states().size()) {
+    node.throw_error("out of bound state provided");
+    return NULL;
+  }
+
+  if (argc > 1) {
+    if (node.typeof(argv[1]) != napi_number) {
+      node.throw_error("expected integer for weight");
+      return NULL;
+    }
+
+    n = node.get_uint32(argv[1]);
+  }
+
+  weights->insert(state, n);
 
   return NULL;
 }
 
 napi_value dist_weight_toString(napi_env env, napi_callback_info info) {
-  napi_value jsthis;
+  napi node{env};
 
-  NAPI_CHECK(napi_get_cb_info(env, info, NULL, NULL, &jsthis, NULL));
+  napi_value jsthis;
+  node.cb_info(info, NULL, NULL, &jsthis);
 
   markov::distribution::weights *weights;
-  NAPI_CHECK(napi_unwrap(env, jsthis, reinterpret_cast<void **>(&weights)));
+  node.unwrap(jsthis, reinterpret_cast<void **>(&weights));
 
   std::string res{};
   for (const auto &state : weights->states()) {
@@ -95,16 +125,13 @@ napi_value dist_weight_toString(napi_env env, napi_callback_info info) {
     res.pop_back();
   }
 
-  napi_value val;
-  NAPI_CHECK(napi_create_string_utf8(env, res.c_str(), res.length(), &val));
-
-  return val;
+  return node.create_utf8(res);
 }
 
 } // namespace node
 } // namespace markov
-
-markov::node::nref markov::node::define_distribution_weight(napi_env env) {
+;
+napi_ref markov::node::define_distribution_weight(napi_env env) {
   napi_property_descriptor dist_props[] = {
       DECLARE_NAPI_METHOD("insert", dist_weight_insert),
       DECLARE_NAPI_METHOD("toString", dist_weight_toString),
@@ -118,5 +145,5 @@ markov::node::nref markov::node::define_distribution_weight(napi_env env) {
   napi_ref dist_ref;
   napi_create_reference(env, dist_cons, 1, &dist_ref);
 
-  return markov::node::nref{dist_ref, dist_cons};
+  return dist_ref;
 }

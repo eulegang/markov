@@ -71,6 +71,13 @@ double markov::transition::ratio(state from, state to) const {
   return base[len * from + to];
 }
 
+double markov::transition::operator[](state from, state to) const {
+  assert(from < len);
+  assert(to < len);
+
+  return base[len * from + to];
+}
+
 markov::distribution
 markov::transition::operator()(const markov::distribution &d) const {
   return markov::distribution(*this, d);
@@ -79,4 +86,8 @@ markov::transition::operator()(const markov::distribution &d) const {
 void markov::transition::operator()(markov::distribution &dest,
                                     const markov::distribution &src) const {
   dest.from(*this, src);
+}
+
+markov::states markov::transition::states() const {
+  return markov::states(len);
 }

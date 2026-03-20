@@ -83,6 +83,11 @@ double markov::distribution::ratio(markov::state state) const {
   return base[state];
 }
 
+double markov::distribution::operator[](markov::state state) const {
+  assert(state < len);
+  return base[state];
+}
+
 void markov::distribution::from(const markov::transition &t,
                                 const markov::distribution &d) {
   for (markov::state i = 0; i < len; i++) {
@@ -94,3 +99,5 @@ void markov::distribution::from(const markov::transition &t,
     base[i] = cur;
   }
 }
+
+markov::states markov::distribution::states() { return markov::states(len); }

@@ -22,6 +22,7 @@ class states final {
 
 public:
   states(state max) : max{max} {}
+  markov::state size() const { return max; }
   state_iter begin() { return state_iter(0); }
   state_iter end() { return state_iter(max); }
 };
@@ -70,6 +71,9 @@ public:
   distribution(distribution &&) = delete;
   distribution &operator=(distribution &&) = delete;
 
+  double operator[](markov::state state) const;
+
+  markov::states states();
   void from(const transition &, const distribution &);
 
   double ratio(state state) const;
@@ -99,9 +103,11 @@ public:
     weights(weights &&) = delete;
     weights &operator=(const weights &);
     weights &operator=(weights &&) = delete;
+    uint32_t operator[](markov::state from, markov::state to) const;
 
     weights &operator+=(const weights &);
     void insert(state from, state to, uint32_t n = 1);
+    markov::states states() const;
     size_t size() const;
   };
 
@@ -114,8 +120,12 @@ public:
   transition(transition &&) = delete;
   transition &operator=(transition &&) = delete;
 
+  double operator[](markov::state from, markov::state to) const;
+
   distribution operator()(const distribution &) const;
   void operator()(distribution &, const distribution &) const;
+
+  markov::states states() const;
 
   double ratio(state from, state to) const;
 };

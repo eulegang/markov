@@ -64,6 +64,13 @@ markov::transition::weights::operator=(const markov::transition::weights &w) {
   return *this;
 }
 
+uint32_t markov::transition::weights::operator[](markov::state from,
+                                                 markov::state to) const {
+  size_t blen = subbuffer_len(len);
+  markov::row *row = (markov::row *)(base + (blen * from));
+  return *row->offset(to);
+}
+
 markov::transition::weights &
 markov::transition::weights::operator+=(const markov::transition::weights &w) {
   assert(len == w.len);
@@ -107,4 +114,8 @@ size_t markov::transition::weights::size() const {
   }
 
   return total;
+}
+
+markov::states markov::transition::weights::states() const {
+  return markov::states(len);
 }
