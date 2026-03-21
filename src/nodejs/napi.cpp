@@ -76,8 +76,28 @@ napi_value markov::node::napi::create_utf8(std::string &str) {
 
 bool markov::node::napi::instanceof(napi_value val, napi_value cons) {
   bool result;
+
+  napi_valuetype ty = typeof(val);
+  (void)ty;
   CHECK(napi_instanceof(_env, val, cons, &result));
   return result;
+}
+
+bool markov::node::napi::instanceof(napi_value val, napi_ref cons) {
+
+  return instanceof(val, deref(cons));
+}
+
+napi_value markov::node::napi::new_instance(napi_value cons, size_t argc,
+                                            napi_value *argv) {
+  napi_value val;
+  CHECK(napi_new_instance(_env, cons, argc, argv, &val));
+  return val;
+}
+
+napi_value markov::node::napi::new_instance(napi_ref cons, size_t argc,
+                                            napi_value *argv) {
+  return new_instance(deref(cons), argc, argv);
 }
 
 napi_value markov::node::napi::deref(napi_ref ref) {

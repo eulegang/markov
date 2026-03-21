@@ -5,7 +5,7 @@
 
 namespace markov {
 namespace node {
-static napi_ref weight_cons;
+napi_ref distribution_cons;
 
 void dist_dtor(napi_env, void *data, void *) {
   auto weight = static_cast<markov::distribution *>(data);
@@ -17,28 +17,39 @@ napi_value dist_ctor(napi_env env, napi_callback_info info) {
   napi_value target = node.new_target(info);
 
   if (target != nullptr) {
-    size_t argc = 1;
+    size_t argc = 2;
     napi_value jsthis;
-    napi_value argv[1];
+    napi_value argv[2];
 
     node.cb_info(info, &argc, argv, &jsthis);
-    napi_value wcons = node.deref(weight_cons);
 
-    if (!node.instanceof(argv[0], wcons)) {
+    markov::distribution *dist;
+
+    if (argc == 2 && node.instanceof(argv[0], transition_cons) &&
+        node.instanceof(argv[1], distribution_cons)) {
+
+      markov::transition *transition = node.unwrap<markov::transition>(argv[0]);
+      markov::distribution *distribution =
+          node.unwrap<markov::distribution>(argv[1]);
+
+      dist = new markov::distribution{*transition, *distribution};
+
+    } else if (argc == 1 &&
+               node.instanceof(argv[0], node.deref(distribution_weight_cons))) {
+      markov::distribution::weights *weights;
+      node.unwrap(argv[0], reinterpret_cast<void **>(&weights));
+
+      dist = new markov::distribution{*weights};
+    } else {
       node.throw_error("distrbutions must be constructed with weights");
       return NULL;
     }
-
-    markov::distribution::weights *weights;
-    node.unwrap(argv[0], reinterpret_cast<void **>(&weights));
-
-    markov::distribution *dist = new markov::distribution{*weights};
 
     node.wrap(jsthis, dist, dist_dtor);
 
     return jsthis;
   } else {
-    napi_throw_error(env, nullptr, "use new keyword");
+    node.throw_error("use new keyword");
     return NULL;
   }
 }
@@ -93,10 +104,7 @@ napi_value dist_toString(napi_env env, napi_callback_info info) {
 } // namespace node
 } // namespace markov
 
-napi_ref markov::node::define_distribution(napi_env env,
-                                           napi_ref weight_cons_ref) {
-
-  markov::node::weight_cons = weight_cons_ref;
+napi_ref markov::node::define_distribution(napi_env env) {
   markov::node::napi node{env};
 
   napi_property_descriptor dist_props[] = {
@@ -108,8 +116,7 @@ napi_ref markov::node::define_distribution(napi_env env,
   NAPI_CHECK(napi_define_class(env, "Distribution", NAPI_AUTO_LENGTH, dist_ctor,
                                NULL, 2, dist_props, &dist_cons));
 
-  napi_ref dist_ref;
-  napi_create_reference(env, dist_cons, 1, &dist_ref);
+  distribution_cons = node.ref(dist_cons);
 
-  return dist_ref;
+  return distribution_cons;
 }

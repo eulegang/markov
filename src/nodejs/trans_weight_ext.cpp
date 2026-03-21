@@ -7,6 +7,7 @@
 
 namespace markov {
 namespace node {
+napi_ref transition_weight_cons;
 
 void trans_weight_dtor(napi_env, void *data, void *) {
   auto weight = static_cast<markov::transition::weights *>(data);
@@ -179,5 +180,6 @@ napi_ref markov::node::define_transition_weight(napi_env env) {
                                trans_weight_ctor, NULL, 2, trans_props,
                                &transw_cons));
 
-  return node.ref(transw_cons);
+  transition_weight_cons = node.ref(transw_cons);
+  return transition_weight_cons;
 }

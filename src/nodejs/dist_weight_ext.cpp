@@ -9,6 +9,8 @@
 
 namespace markov {
 namespace node {
+napi_ref distribution_weight_cons;
+
 void dist_weight_dtor(napi_env, void *data, void *) {
   auto weight = static_cast<markov::distribution::weights *>(data);
   delete weight;
@@ -142,8 +144,7 @@ napi_ref markov::node::define_distribution_weight(napi_env env) {
                                dist_weight_ctor, NULL, 2, dist_props,
                                &dist_cons));
 
-  napi_ref dist_ref;
-  napi_create_reference(env, dist_cons, 1, &dist_ref);
+  napi_create_reference(env, dist_cons, 1, &distribution_weight_cons);
 
-  return dist_ref;
+  return distribution_weight_cons;
 }

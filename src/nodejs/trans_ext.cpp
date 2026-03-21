@@ -2,11 +2,12 @@
 #include "markov.h"
 #include <cstdlib>
 #include <format>
+#include <node/js_native_api_types.h>
 
 namespace markov {
 namespace node {
 
-napi_ref transw_cons;
+napi_ref transition_cons;
 
 void trans_dtor(napi_env, void *data, void *) {
   auto trans = static_cast<markov::transition *>(data);
@@ -28,7 +29,7 @@ napi_value trans_ctor(napi_env env, napi_callback_info info) {
 
   node.cb_info(info, &argc, argv, &jsthis);
 
-  if (!node.instanceof(argv[0], node.deref(transw_cons))) {
+  if (!node.instanceof(argv[0], node.deref(transition_weight_cons))) {
     node.throw_error("transition must be constructed with weights");
     return NULL;
   }
@@ -69,22 +70,42 @@ napi_value trans_toString(napi_env env, napi_callback_info info) {
   return node.create_utf8(res);
 }
 
+napi_value trans_apply(napi_env env, napi_callback_info info) {
+  markov::node::napi node{env};
+  size_t argc = 1;
+  napi_value argv[1];
+  napi_value jsthis;
+
+  node.cb_info(info, &argc, argv, &jsthis);
+
+  if (!node.instanceof(argv[0], node.deref(distribution_cons))) {
+    node.throw_error("invalid argument");
+    return NULL;
+  }
+
+  napi_value args[2] = {
+      jsthis,
+      argv[0],
+  };
+
+  return node.new_instance(distribution_cons, 2, args);
+}
+
 } // namespace node
 } // namespace markov
 
-napi_ref markov::node::define_transition(napi_env env,
-                                         napi_ref weight_cons_ref) {
-  transw_cons = weight_cons_ref;
-
+napi_ref markov::node::define_transition(napi_env env) {
   markov::node::napi node{env};
 
   napi_property_descriptor trans_props[] = {
       DECLARE_NAPI_METHOD("toString", trans_toString),
+      DECLARE_NAPI_METHOD("apply", trans_apply),
   };
 
   napi_value trans_cons;
   NAPI_CHECK(napi_define_class(env, "Transition", NAPI_AUTO_LENGTH, trans_ctor,
-                               NULL, 1, trans_props, &trans_cons));
+                               NULL, 2, trans_props, &trans_cons));
 
-  return node.ref(trans_cons);
+  transition_cons = node.ref(trans_cons);
+  return transition_cons;
 }

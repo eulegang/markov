@@ -35,9 +35,9 @@ napi_value init(napi_env env, napi_value exports) {
   markov::node::Refs *refs = new markov::node::Refs;
 
   napi_ref distw_ref = markov::node::define_distribution_weight(env);
-  napi_ref dist_ref = markov::node::define_distribution(env, distw_ref);
+  napi_ref dist_ref = markov::node::define_distribution(env);
   napi_ref transw_ref = markov::node::define_transition_weight(env);
-  napi_ref trans_ref = markov::node::define_transition(env, transw_ref);
+  napi_ref trans_ref = markov::node::define_transition(env);
 
   refs->dist = dist_ref;
   refs->distw = distw_ref;

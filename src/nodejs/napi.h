@@ -28,6 +28,11 @@ public:
 
   void wrap(napi_value jsthis, void *data, napi_finalize dtor);
   void unwrap(napi_value jsthis, void **data);
+  template <typename T> T *unwrap(napi_value value) {
+    T *res;
+    unwrap(value, reinterpret_cast<void **>(&res));
+    return res;
+  }
 
   void set_prop(napi_value obj, const char *name, napi_value val);
 
@@ -37,6 +42,9 @@ public:
   napi_value deref(napi_ref ref);
   napi_ref ref(napi_value);
   bool instanceof(napi_value value, napi_value cons);
+  bool instanceof(napi_value value, napi_ref cons);
+  napi_value new_instance(napi_value cons, size_t argc, napi_value *argv);
+  napi_value new_instance(napi_ref cons, size_t argc, napi_value *argv);
 };
 
 class status_exception : public std::exception {

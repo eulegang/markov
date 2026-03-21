@@ -11,4 +11,11 @@ const chance_weight = new Transition.Weights([
 const chances = new Transition(chance_weight);
 
 console.log(state.toString());
-console.log(chances.toString())
+console.log(chances.toString());
+
+let next = chances.apply(state);
+for (let i = 0; i < 100; i++) {
+  console.log(`${i + 1}: ${next}`);
+
+  next = chances.apply(next);
+}

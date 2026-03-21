@@ -13,10 +13,15 @@
 
 namespace markov {
 namespace node {
-napi_ref define_distribution(napi_env env, napi_ref weight_cons_ref);
+extern napi_ref distribution_cons;
+extern napi_ref distribution_weight_cons;
+extern napi_ref transition_cons;
+extern napi_ref transition_weight_cons;
+
+napi_ref define_distribution(napi_env env);
 napi_ref define_distribution_weight(napi_env env);
 napi_ref define_transition_weight(napi_env env);
-napi_ref define_transition(napi_env env, napi_ref weight_cons_ref);
+napi_ref define_transition(napi_env env);
 } // namespace node
 } // namespace markov
 
