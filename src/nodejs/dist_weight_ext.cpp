@@ -72,8 +72,13 @@ napi_value dist_weight_insert(napi_env env, napi_callback_info info) {
 
   napi_value jsthis;
   napi_value argv[2];
-  size_t argc = 1;
+  size_t argc = 2;
   node.cb_info(info, &argc, argv, &jsthis);
+
+  if (argc < 1) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
 
   markov::distribution::weights *weights;
   node.unwrap(jsthis, reinterpret_cast<void **>(&weights));

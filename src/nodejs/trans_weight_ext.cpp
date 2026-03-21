@@ -25,6 +25,11 @@ napi_value trans_weight_ctor(napi_env env, napi_callback_info info) {
     napi_value argv[1];
     node.cb_info(info, &argc, argv, &jsthis);
 
+    if (argc < 1) {
+      node.throw_error("invalid arguments");
+      return NULL;
+    }
+
     markov::transition::weights *weights;
     if (node.typeof(argv[0]) == napi_number) {
       uint32_t dim = node.get_uint32(argv[0]);
@@ -100,11 +105,16 @@ napi_value trans_weight_ctor(napi_env env, napi_callback_info info) {
 napi_value trans_weight_insert(napi_env env, napi_callback_info info) {
   markov::node::napi node{env};
 
-  size_t argc = 2;
+  size_t argc = 3;
   napi_value argv[3];
   napi_value jsthis;
 
   node.cb_info(info, &argc, argv, &jsthis);
+
+  if (argc < 2) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
 
   if (node.typeof(argv[0]) != napi_number ||
       node.typeof(argv[1]) != napi_number) {
@@ -143,8 +153,8 @@ napi_value trans_weight_toString(napi_env env, napi_callback_info info) {
   napi_value jsthis;
   node.cb_info(info, NULL, NULL, &jsthis);
 
-  markov::transition::weights *weights;
-  node.unwrap(jsthis, reinterpret_cast<void **>(&weights));
+  markov::transition::weights *weights =
+      node.unwrap<markov::transition::weights>(jsthis);
 
   std::string res{};
 

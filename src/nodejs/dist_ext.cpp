@@ -62,6 +62,11 @@ napi_value dist_ratio(napi_env env, napi_callback_info info) {
   napi_value jsthis;
   node.cb_info(info, &argc, argv, &jsthis);
 
+  if (argc < 1) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
   if (node.typeof(argv[0]) != napi_number) {
     node.throw_error("expected state");
     return NULL;
@@ -87,8 +92,7 @@ napi_value dist_toString(napi_env env, napi_callback_info info) {
   napi_value jsthis;
   node.cb_info(info, NULL, NULL, &jsthis);
 
-  markov::distribution *dist;
-  node.unwrap(jsthis, reinterpret_cast<void **>(&dist));
+  markov::distribution *dist = node.unwrap<markov::distribution>(jsthis);
 
   std::string res{};
 

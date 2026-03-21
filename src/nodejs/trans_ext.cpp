@@ -29,6 +29,11 @@ napi_value trans_ctor(napi_env env, napi_callback_info info) {
 
   node.cb_info(info, &argc, argv, &jsthis);
 
+  if (argc < 1) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
   if (!node.instanceof(argv[0], node.deref(transition_weight_cons))) {
     node.throw_error("transition must be constructed with weights");
     return NULL;
@@ -77,6 +82,11 @@ napi_value trans_apply(napi_env env, napi_callback_info info) {
   napi_value jsthis;
 
   node.cb_info(info, &argc, argv, &jsthis);
+
+  if (argc < 1) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
 
   if (!node.instanceof(argv[0], node.deref(distribution_cons))) {
     node.throw_error("invalid argument");

@@ -28,7 +28,7 @@ public:
 
   void wrap(napi_value jsthis, void *data, napi_finalize dtor);
   void unwrap(napi_value jsthis, void **data);
-  template <typename T> T *unwrap(napi_value value) {
+  template <typename T> inline T *unwrap(napi_value value) {
     T *res;
     unwrap(value, reinterpret_cast<void **>(&res));
     return res;
