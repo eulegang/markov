@@ -1,4 +1,4 @@
-const { Distribution, Transition } = require("../../build/markov")
+const { Distribution, Transition } = require("../../build/node/markov")
 
 const initial_state = new Distribution.Weights([1, 0]);
 const state = new Distribution(initial_state);

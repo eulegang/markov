@@ -6,11 +6,28 @@ project(markov
   DESCRIPTION "markov chains"
 )
 
+add_library(
+  markov SHARED 
 
-file(GLOB LIB_SRC "src/*.cpp")
-add_library(markov SHARED ${LIB_SRC})
+  src/distribution.cpp
+  src/distribution_weights.cpp
+  src/transition.cpp
+  src/transitions_weights.cpp
+)
+
+add_library(
+  markov_static STATIC 
+
+  src/distribution.cpp
+  src/distribution_weights.cpp
+  src/transition.cpp
+  src/transitions_weights.cpp
+)
+
+set_property(TARGET markov_static PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 
 include(cmake/gdb.cmake)
 include(cmake/test.cmake)
-include(cmake/nodejs.cmake)
+add_subdirectory(node)
 
