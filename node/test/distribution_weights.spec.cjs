@@ -2,7 +2,7 @@ const { test, describe } = require("node:test")
 const assert = require("node:assert/strict")
 const { Distribution } = require("markov")
 
-describe("Distribution", () => {
+describe("Distribution.Weights", () => {
   test("constrcution", (t) => {
     t.test("should throw when constructed with no arguments", { expectFailure: true }, () => {
       new Distribution.Weights()

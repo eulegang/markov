@@ -36,8 +36,15 @@ napi_value dist_ctor(napi_env env, napi_callback_info info) {
 
     } else if (argc == 1 &&
                node.instanceof(argv[0], node.deref(distribution_weight_cons))) {
-      markov::distribution::weights *weights;
-      node.unwrap(argv[0], reinterpret_cast<void **>(&weights));
+      markov::distribution::weights *weights =
+          node.unwrap<markov::distribution::weights>(argv[0]);
+
+      if (weights->size() == 0) {
+        node.throw_error("invalid weights");
+        return NULL;
+      }
+
+      // node.unwrap(argv[0], reinterpret_cast<void **>(&weights));
 
       dist = new markov::distribution{*weights};
     } else {
@@ -54,7 +61,7 @@ napi_value dist_ctor(napi_env env, napi_callback_info info) {
   }
 }
 
-napi_value dist_ratio(napi_env env, napi_callback_info info) {
+napi_value dist_get(napi_env env, napi_callback_info info) {
   markov::node::napi node{env};
 
   size_t argc = 1;
@@ -112,7 +119,7 @@ napi_ref markov::node::define_distribution(napi_env env) {
   markov::node::napi node{env};
 
   napi_property_descriptor dist_props[] = {
-      DECLARE_NAPI_METHOD("ratio", dist_ratio),
+      DECLARE_NAPI_METHOD("get", dist_get),
       DECLARE_NAPI_METHOD("toString", dist_toString),
   };
 
