@@ -1,5 +1,3 @@
-console.log("NODE_PATH", process.env["NODE_PATH"])
-
 const { test, describe } = require("node:test")
 const assert = require("node:assert/strict")
 const { Distribution } = require("markov")
