@@ -38,6 +38,8 @@ public:
 
   napi_value create_utf8(std::string &str);
   napi_value create_f64(double d);
+  napi_value create_uint32(uint32_t t);
+  napi_value create_uint64(uint64_t t);
 
   napi_value deref(napi_ref ref);
   napi_ref ref(napi_value);

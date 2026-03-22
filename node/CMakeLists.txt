@@ -19,3 +19,12 @@ set_target_properties(
 target_link_libraries(nodejs markov_static)
 target_include_directories(nodejs PUBLIC ../src)
 
+enable_testing()
+
+add_test(
+  NAME node
+  COMMAND node --test
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set_property(TEST node PROPERTY ENVIRONMENT_MODIFICATION "NODE_PATH=path_list_append:${CMAKE_CURRENT_BINARY_DIR}")

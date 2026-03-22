@@ -77,3 +77,18 @@ markov::states markov::distribution::weights::states() {
 uint32_t markov::distribution::weights::operator[](markov::state state) const {
   return base[state];
 }
+
+void markov::distribution::weights::extend(
+    const markov::distribution::weights &other) {
+  assert(len == other.len);
+
+  if (base == other.base) {
+    for (size_t i = 0; i < len; i++) {
+      base[i] *= 2;
+    }
+  } else {
+    for (size_t i = 0; i < len; i++) {
+      base[i] += other.base[i];
+    }
+  }
+}

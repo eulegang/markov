@@ -74,6 +74,22 @@ napi_value markov::node::napi::create_utf8(std::string &str) {
   return value;
 }
 
+napi_value markov::node::napi::create_uint32(uint32_t val) {
+  napi_value value;
+
+  CHECK(napi_create_uint32(_env, val, &value));
+
+  return value;
+}
+
+napi_value markov::node::napi::create_uint64(uint64_t val) {
+  napi_value value;
+
+  CHECK(napi_create_bigint_uint64(_env, val, &value));
+
+  return value;
+}
+
 bool markov::node::napi::instanceof(napi_value val, napi_value cons) {
   bool result;
 
