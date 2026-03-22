@@ -119,3 +119,36 @@ size_t markov::transition::weights::size() const {
 markov::states markov::transition::weights::states() const {
   return markov::states(len);
 }
+
+void markov::transition::weights::extend(
+    const markov::transition::weights &weights) {
+  assert(len == weights.len);
+  size_t blen = subbuffer_len(len);
+
+  if (base == weights.base) {
+    for (const auto &from : states()) {
+      markov::row *row = (markov::row *)(base + (blen * from));
+      uint32_t *rptr = row->offset();
+      row->total *= 2;
+
+      for (const auto &_ : states()) {
+        *(rptr++) *= 2;
+      }
+    }
+  } else {
+    for (const auto &from : states()) {
+      markov::row *row = (markov::row *)(base + (blen * from));
+      markov::row *orow = (markov::row *)(weights.base + (blen * from));
+      uint32_t *rptr = row->offset();
+      uint32_t *optr = orow->offset();
+
+      row->total += orow->total;
+
+      for (const auto &_ : states()) {
+        *(rptr++) += *(optr++);
+      }
+    }
+  }
+
+  check_invariant();
+}

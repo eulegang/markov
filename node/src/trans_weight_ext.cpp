@@ -2,7 +2,6 @@
 #include "markov.h"
 #include <cstdlib>
 #include <limits>
-#include <memory>
 #include <node/js_native_api_types.h>
 
 namespace markov {
@@ -45,6 +44,11 @@ napi_value trans_weight_ctor(napi_env env, napi_callback_info info) {
       }
 
       weights = new markov::transition::weights{(markov::state)dim};
+    } else if (node.instanceof(argv[0], transition_weight_cons)) {
+      markov::transition::weights *other =
+          node.unwrap<markov::transition::weights>(argv[0]);
+
+      weights = new markov::transition::weights{*other};
     } else if (node.is_array(argv[0])) {
       uint32_t dim = node.array_length(argv[0]);
 
@@ -148,6 +152,49 @@ napi_value trans_weight_insert(napi_env env, napi_callback_info info) {
   return NULL;
 }
 
+napi_value trans_weight_get(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  size_t argc = 2;
+  napi_value jsthis;
+  napi_value argv[2];
+
+  node.cb_info(info, &argc, argv, &jsthis);
+
+  if (argc != 2 || node.typeof(argv[0]) != napi_number ||
+      node.typeof(argv[1]) != napi_number) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
+  uint32_t row = node.get_uint32(argv[0]);
+  uint32_t col = node.get_uint32(argv[1]);
+  markov::transition::weights *weights =
+      node.unwrap<markov::transition::weights>(jsthis);
+
+  if (row >= weights->states().size() || col >= weights->states().size()) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
+  uint32_t w = (*weights)[row, col];
+
+  return node.create_uint32(w);
+}
+
+napi_value trans_weight_total(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  napi_value jsthis;
+
+  node.cb_info(info, NULL, NULL, &jsthis);
+
+  markov::transition::weights *weights =
+      node.unwrap<markov::transition::weights>(jsthis);
+
+  return node.create_uint32(weights->size());
+}
+
 napi_value trans_weight_toString(napi_env env, napi_callback_info info) {
   napi node{env};
   napi_value jsthis;
@@ -174,6 +221,52 @@ napi_value trans_weight_toString(napi_env env, napi_callback_info info) {
   return node.create_utf8(res);
 }
 
+napi_value trans_weight_extend(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  size_t argc = 1;
+  napi_value jsthis;
+  napi_value argv[1];
+
+  node.cb_info(info, &argc, argv, &jsthis);
+
+  napi_valuetype ty = node.typeof(argv[0]);
+  (void)ty;
+
+  if (argc != 1 || !node.instanceof(argv[0], transition_weight_cons)) {
+    node.throw_error("invalid arguments");
+    abort();
+    return NULL;
+  }
+
+  markov::transition::weights *subject =
+      node.unwrap<markov::transition::weights>(jsthis);
+  markov::transition::weights *other =
+      node.unwrap<markov::transition::weights>(argv[0]);
+
+  if (subject->states().size() != other->states().size()) {
+    node.throw_error("incompatible state count");
+    return NULL;
+  }
+
+  subject->extend(*other);
+
+  return NULL;
+}
+
+napi_value trans_weight_states(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  napi_value jsthis;
+
+  node.cb_info(info, NULL, NULL, &jsthis);
+
+  markov::transition::weights *weights =
+      node.unwrap<markov::transition::weights>(jsthis);
+
+  return node.create_uint32(weights->states().size());
+}
+
 } // namespace node
 } // namespace markov
 
@@ -182,12 +275,16 @@ napi_ref markov::node::define_transition_weight(napi_env env) {
 
   napi_property_descriptor trans_props[] = {
       DECLARE_NAPI_METHOD("insert", trans_weight_insert),
+      DECLARE_NAPI_METHOD("extend", trans_weight_extend),
       DECLARE_NAPI_METHOD("toString", trans_weight_toString),
+      DECLARE_NAPI_METHOD("get", trans_weight_get),
+      DECLARE_NAPI_METHOD("total", trans_weight_total),
+      DECLARE_NAPI_GETTER("states", trans_weight_states),
   };
 
   napi_value transw_cons;
   NAPI_CHECK(napi_define_class(env, "Weights", NAPI_AUTO_LENGTH,
-                               trans_weight_ctor, NULL, 2, trans_props,
+                               trans_weight_ctor, NULL, 6, trans_props,
                                &transw_cons));
 
   transition_weight_cons = node.ref(transw_cons);

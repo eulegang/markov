@@ -91,4 +91,6 @@ void markov::distribution::weights::extend(
       base[i] += other.base[i];
     }
   }
+
+  check_invariant();
 }

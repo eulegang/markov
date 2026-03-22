@@ -108,6 +108,7 @@ public:
 
     weights &operator+=(const weights &);
     void insert(state from, state to, uint32_t n = 1);
+    void extend(const weights &);
     markov::states states() const;
     size_t size() const;
   };

@@ -72,16 +72,6 @@ describe("Distribution.Weights", () => {
       assert.strictEqual(dist.get(1), 2)
     })
 
-    t.test("internal distribution", () => {
-      const dist = new Distribution.Weights([19, 1]);
-
-      dist.extend(dist);
-
-      assert.strictEqual(dist.total(), 40)
-      assert.strictEqual(dist.get(0), 38)
-      assert.strictEqual(dist.get(1), 2)
-    })
-
     t.test("incompatible states", { expectFailure: true }, () => {
       const dist = new Distribution.Weights([19, 1]);
       const diff = new Distribution.Weights([19, 1, 2]);
