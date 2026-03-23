@@ -152,3 +152,15 @@ void markov::transition::weights::extend(
 
   check_invariant();
 }
+
+bool markov::transition::weights::is_ready() const {
+  size_t blen = subbuffer_len(len);
+  for (const auto &state : states()) {
+    markov::row *row = (markov::row *)(base + (blen * state));
+
+    if (row->total == 0)
+      return false;
+  }
+
+  return true;
+}

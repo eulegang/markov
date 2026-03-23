@@ -111,6 +111,7 @@ public:
     void extend(const weights &);
     markov::states states() const;
     size_t size() const;
+    bool is_ready() const;
   };
 
   transition(const weights &);

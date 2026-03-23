@@ -42,6 +42,11 @@ napi_value trans_ctor(napi_env env, napi_callback_info info) {
   markov::transition::weights *weights;
   node.unwrap(argv[0], reinterpret_cast<void **>(&weights));
 
+  if (!weights->is_ready()) {
+    node.throw_error("invalid weights");
+    return NULL;
+  }
+
   markov::transition *trans = new markov::transition{*weights};
 
   node.wrap(jsthis, trans, trans_dtor);
@@ -73,6 +78,48 @@ napi_value trans_toString(napi_env env, napi_callback_info info) {
   res.pop_back();
 
   return node.create_utf8(res);
+}
+
+napi_value trans_get(napi_env env, napi_callback_info info) {
+
+  markov::node::napi node{env};
+  size_t argc = 2;
+  napi_value argv[2];
+  napi_value jsthis;
+
+  node.cb_info(info, &argc, argv, &jsthis);
+
+  if (argc != 2 || node.typeof(argv[0]) != napi_number ||
+      node.typeof(argv[1]) != napi_number) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
+  markov::transition *transition = node.unwrap<markov::transition>(jsthis);
+
+  uint32_t row = node.get_uint32(argv[0]);
+  uint32_t col = node.get_uint32(argv[1]);
+
+  if (row >= transition->states().size() ||
+      col >= transition->states().size()) {
+    node.throw_error("invalid arguments");
+    return NULL;
+  }
+
+  return node.create_f64((*transition)[row, col]);
+}
+
+napi_value trans_states(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  napi_value jsthis;
+
+  node.cb_info(info, NULL, NULL, &jsthis);
+
+  markov::distribution::weights *weights =
+      node.unwrap<markov::distribution::weights>(jsthis);
+
+  return node.create_uint32(weights->states().size());
 }
 
 napi_value trans_apply(napi_env env, napi_callback_info info) {
@@ -109,12 +156,14 @@ napi_ref markov::node::define_transition(napi_env env) {
 
   napi_property_descriptor trans_props[] = {
       DECLARE_NAPI_METHOD("toString", trans_toString),
+      DECLARE_NAPI_METHOD("get", trans_get),
       DECLARE_NAPI_METHOD("apply", trans_apply),
+      DECLARE_NAPI_GETTER("states", trans_states),
   };
 
   napi_value trans_cons;
   NAPI_CHECK(napi_define_class(env, "Transition", NAPI_AUTO_LENGTH, trans_ctor,
-                               NULL, 2, trans_props, &trans_cons));
+                               NULL, 4, trans_props, &trans_cons));
 
   transition_cons = node.ref(trans_cons);
   return transition_cons;
