@@ -116,10 +116,9 @@ napi_value trans_states(napi_env env, napi_callback_info info) {
 
   node.cb_info(info, NULL, NULL, &jsthis);
 
-  markov::distribution::weights *weights =
-      node.unwrap<markov::distribution::weights>(jsthis);
+  markov::transition *transition = node.unwrap<markov::transition>(jsthis);
 
-  return node.create_uint32(weights->states().size());
+  return node.create_uint32(transition->states().size());
 }
 
 napi_value trans_apply(napi_env env, napi_callback_info info) {

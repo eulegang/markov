@@ -27,7 +27,7 @@ describe("Transition", () => {
     assertFloatEquals(transition.get(1, 1), 1.00, 0.00001)
   })
 
-  test("states", () => {
+  test("max state inspection", () => {
     const transition = new Transition(new Transition.Weights(weights));
 
     assert.strictEqual(transition.states, 2);

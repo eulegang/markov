@@ -28,6 +28,11 @@ describe("Distribution", () => {
 })
 
 
+test("max state inspection", () => {
+  const dist = new Distribution(new Distribution.Weights([19, 1]));
+  assert.strictEqual(dist.states, 2);
+})
+
 function assertFloatEquals(actual, expected, tolerance, message) {
   const difference = Math.abs(actual - expected);
   if (difference >= tolerance) {

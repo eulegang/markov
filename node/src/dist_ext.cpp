@@ -112,6 +112,19 @@ napi_value dist_toString(napi_env env, napi_callback_info info) {
 
   return node.create_utf8(res);
 }
+
+napi_value dist_states(napi_env env, napi_callback_info info) {
+  napi node{env};
+
+  napi_value jsthis;
+
+  node.cb_info(info, NULL, NULL, &jsthis);
+
+  markov::distribution *dist = node.unwrap<markov::distribution>(jsthis);
+
+  return node.create_uint32(dist->states().size());
+}
+
 } // namespace node
 } // namespace markov
 
@@ -121,11 +134,12 @@ napi_ref markov::node::define_distribution(napi_env env) {
   napi_property_descriptor dist_props[] = {
       DECLARE_NAPI_METHOD("get", dist_get),
       DECLARE_NAPI_METHOD("toString", dist_toString),
+      DECLARE_NAPI_GETTER("states", dist_states),
   };
 
   napi_value dist_cons;
   NAPI_CHECK(napi_define_class(env, "Distribution", NAPI_AUTO_LENGTH, dist_ctor,
-                               NULL, 2, dist_props, &dist_cons));
+                               NULL, 3, dist_props, &dist_cons));
 
   distribution_cons = node.ref(dist_cons);
 
